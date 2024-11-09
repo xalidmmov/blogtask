@@ -1,0 +1,158 @@
+create database BlogDB      -- mellim insertleri chatdan doldurmusam (hamsina sonsuz sayda xalid datasi yazmaq isdemedim yazmaq isdemedim)
+                            -- bezi problemler var aradan qaldira bilmedim indi atiram sabah yeniden baxacam 
+use BlogDB
+
+Create table Categories (
+    Id Int primary key Identity,        
+    [Name] NVARCHAR(50) NOT NULL Unique        
+);
+
+Insert Into Categories ([Name])
+values ('Xalid1'), 
+       ('Xalid2'), 
+       ('Xalid3'), 
+       ('Xalid4');
+
+Create table Tags (
+    Id Int primary key Identity,          
+    [Name] nvarchar(50) NOT NULL UNIQUE        
+);
+
+insert into Tags ([Name])
+values ('SQL'), 
+       ('Programming'), 
+       ('Web Development'), 
+       ('Fitness'), 
+       ('Health Tips');
+
+
+
+create table Users (
+    Id Int primary key Identity,        
+    UserName Nvarchar(50) NOT NULL unique,   
+    FullName Nvarchar(50) NOT NULL,        
+    Age int Check (Age >= 0 AND Age <= 150)  
+);
+
+
+Insert into Users (UserName, FullName, Age)
+VALUES ('john_doe', 'John Doe', 30),
+       ('jane_smith', 'Jane Smith', 25),
+       ('mike_ross', 'Mike Ross', 35),
+       ('susan_lee', 'Susan Lee', 28);
+
+
+Create table Blogs (
+    Id Int primary key Identity,        
+    Title Nvarchar(50) NOT NULL,             
+    [Description] Nvarchar(50) NOT NULL,                              
+    UserId int foreign key references Users(Id),         
+    CategoryId int foreign key references Categories(Id) 
+);
+
+
+Insert Into Blogs (Title, [Description], UserId, CategoryId)
+VALUES ('The Future of Web Development', 'A deep dive into emerging web technologies.', 1, 1),
+       ('Healthy Eating Habits', 'How to maintain.', 2, 4),
+       ('JavaScript Basics', 'Understanding ', 1, 1),
+       ('How to Stay Fit', 'Fitness tips for a busy lifestyle.', 3, 3),
+       ('The Importance of Education', 'Why education', 4, 2);
+
+
+
+
+CREATE TABLE BlogCategories (
+    Id Int primary key identity,         
+    BlogId int foreign key REFERENCES Blogs(Id),        
+    CategoryId int foreign key REFERENCES Categories(Id) 
+);
+
+INSERT INTO BlogCategories (BlogId, CategoryId)
+VALUES 
+    (1, 1),   
+    (2, 4),   
+    (3, 1),  
+    (4, 3),   
+    (5, 2);
+
+Create table BlogTags (
+   Id Int primary key identity,                                   
+    BlogId int foreign key references Blogs(Id),   
+    TagId int foreign key references Tags(Id)  
+);
+
+Insert into BlogTags (BlogId, TagId)
+VALUES (1, 1),  
+       (2, 4),  
+       (3, 2), 
+       (4, 5), 
+       (5, 3); 
+
+Create table Comments (
+    Id Int primary key identity,        
+    Content Nvarchar(100) NOT NULL,          
+    UserId int foreign key references Users(Id),        
+    BlogId int foreign key references Blogs(Id)        
+);
+
+Insert Into Comments (Content, UserId, BlogId)
+VALUES ('This is a great post about web development!', 1, 1),
+       ('I agree with the points on healthy eating.', 2, 2),
+       ('JavaScript is my favorite programming language.', 1, 3),
+       ('I found these fitness tips very helpful.', 3, 4),
+       ('Education is indeed a key to success.', 4, 5);
+
+SELECT * FROM Categories;
+SELECT * FROM Tags;
+SELECT * FROM Users;
+SELECT * FROM Blogs;
+SELECT * FROM BlogCategories;
+SELECT * FROM BlogTags;
+SELECT * FROM Comments;
+
+Create view BlogsAndUsers AS   -- viewler error verir seherden ustunde aradrima eleyirem problemi tapa bilmirem
+SELECT 
+    Blogs.Title, 
+    Users.UserName, 
+    Users.FullName
+FROM 
+    Blogs 
+JOIN 
+    Users ON Blogs.UserId = Users.Id;
+
+
+SELECT * FROM BlogsAndUsers;
+
+
+
+
+CREATE VIEW BlogsAndCategories AS
+SELECT 
+    Blogs.Title, 
+    Categories.Name AS CategoryName
+FROM 
+    Blogs 
+JOIN 
+    BlogCategories ON Blogs.Id = BlogCategories.BlogId
+JOIN 
+    Categories ON BlogCategories.CategoryId = Categories.Id;
+
+SELECT * FROM BlogsAndCategories;
+
+
+
+CREATE PROCEDURE GetComments  -- eyni problem funksiyalardad yasanir sabah ,gece yada sabah problemi tapib , mumkun olsa commit eleyecem
+    @userId INT
+AS
+BEGIN
+    SELECT 
+        Comments.Id AS CommentId, 
+        Comments.Content, 
+        Comments.BlogId
+    FROM 
+        Comments
+    WHERE 
+        Comments.UserId = @userId;
+END;
+
+
